@@ -1,6 +1,18 @@
 FROM openjdk:8-jdk
+MAINTAINER Vilppu Vuorinen "vilppu.vuorinen@jubic.fi"
 
-RUN apt-get update && apt-get install -y git curl && rm -rf /var/lib/apt/lists/*
+ADD ./apt/unstable.pref /etc/apt/preferences.d/unstanble.pref
+ADD ./apt/unstable.list /etc/apt/sources.list.d/unstanble.list
+
+RUN apt-get update \
+  && apt-get install -y \
+    wget \
+    git \
+    curl \
+    zip \
+    gettext \
+  && apt-get install -y -t unstable libnss-wrapper \
+  && rm -rf /var/lib/apt/lists/*
 
 ENV JENKINS_HOME /var/jenkins_home
 ENV JENKINS_SLAVE_AGENT_PORT 50000
@@ -21,6 +33,8 @@ RUN groupadd -g ${gid} ${group} \
 ADD root /
 RUN mkdir -p "${JENKINS_HOME}" \
   && /usr/libexec/fix-permissions "${JENKINS_HOME}" \
+  && mkdir -p /opt/jenkins \
+  && /usr/libexec/fix-permissions /opt/jenkins \
   && rm /usr/libexec/fix-permissions
 VOLUME /var/jenkins_home
 
@@ -65,6 +79,7 @@ EXPOSE 50000
 ENV COPY_REFERENCE_FILE_LOG $JENKINS_HOME/copy_reference_file.log
 
 COPY jenkins-support /usr/local/bin/jenkins-support
+ADD passwd.template /opt/jenkins/passwd.template
 COPY jenkins.sh /usr/local/bin/jenkins.sh
 
 # from a derived Dockerfile, can use `RUN plugins.sh active.txt` to setup /usr/share/jenkins/ref/plugins from a support bundle

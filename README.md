@@ -1,4 +1,6 @@
-# Official Jenkins Docker image
+# Openshift compatible Jenkins Docker image
+
+Based on official Jenkins Docker image.
 
 The Jenkins Continuous Integration and Delivery server.
 
@@ -14,7 +16,7 @@ For weekly releases check out [`jenkinsci/jenkins`](https://hub.docker.com/r/jen
 # Usage
 
 ```
-docker run -p 8080:8080 -p 50000:50000 jenkinsci/jenkins:lts
+docker run -p 8080:8080 -p 50000:50000 jubicoy/jenkins-base-debian
 ```
 
 NOTE: read below the _build executors_ part for the role of the `50000` port mapping.
@@ -23,10 +25,10 @@ This will store the workspace in /var/jenkins_home. All Jenkins data lives in th
 You will probably want to make that an explicit volume so you can manage it and attach to another container for upgrades :
 
 ```
-docker run -p 8080:8080 -p 50000:50000 -v jenkins_home:/var/jenkins_home jenkinsci/jenkins:lts
+docker run -p 8080:8080 -p 50000:50000 -v jenkins_home:/var/jenkins_home jubicoy/jenkins-base-debian
 ```
 
-this will automatically create a 'jenkins_home' volume on docker host, that will survive container stop/restart/deletion. 
+this will automatically create a 'jenkins_home' volume on docker host, that will survive container stop/restart/deletion.
 
 Avoid using a bind mount from a folder on host into `/var/jenkins_home`, as this might result in file permission issue. If you _really_ need to bind mount jenkins_home, ensure that directory on host is accessible by the jenkins user in container (jenkins user - uid 1000) or use `-u some_other_user` parameter with `docker run`.
 
@@ -55,7 +57,7 @@ Jenkins.instance.setNumExecutors(5)
 and `Dockerfile`
 
 ```
-FROM jenkins
+FROM jubicoy/jenkins-base-debian
 COPY executors.groovy /usr/share/jenkins/ref/init.groovy.d/executors.groovy
 ```
 
@@ -74,7 +76,7 @@ You might need to customize the JVM running Jenkins, typically to pass system pr
 variable for this purpose :
 
 ```
-docker run --name myjenkins -p 8080:8080 -p 50000:50000 --env JAVA_OPTS=-Dhudson.footerURL=http://mycompany.com jenkinsci/jenkins:lts
+docker run --name myjenkins -p 8080:8080 -p 50000:50000 --env JAVA_OPTS=-Dhudson.footerURL=http://mycompany.com jubicoy/jenkins-base-debian
 ```
 
 # Configuring logging
@@ -89,7 +91,7 @@ handlers=java.util.logging.ConsoleHandler
 jenkins.level=FINEST
 java.util.logging.ConsoleHandler.level=FINEST
 EOF
-docker run --name myjenkins -p 8080:8080 -p 50000:50000 --env JAVA_OPTS="-Djava.util.logging.config.file=/var/jenkins_home/log.properties" -v `pwd`/data:/var/jenkins_home jenkinsci/jenkins:lts
+docker run --name myjenkins -p 8080:8080 -p 50000:50000 --env JAVA_OPTS="-Djava.util.logging.config.file=/var/jenkins_home/log.properties" -v `pwd`/data:/var/jenkins_home jubicoy/jenkins-base-debian
 ```
 
 # Configuring reverse proxy
@@ -101,7 +103,7 @@ If you want to install Jenkins behind a reverse proxy with prefix, example: mysi
 
 Argument you pass to docker running the jenkins image are passed to jenkins launcher, so you can run for sample :
 ```
-docker run jenkins --version
+docker run jubicoy/jenkins-base-debian --version
 ```
 This will dump Jenkins version, just like when you run jenkins as an executable war.
 
@@ -110,7 +112,7 @@ define a derived jenkins image based on the official one with some customized se
 to force use of HTTPS with a certificate included in the image
 
 ```
-FROM jenkins:1.565.3
+FROM jubicoy/jenkins-base-debian
 
 COPY https.pem /var/lib/jenkins/cert
 COPY https.key /var/lib/jenkins/pk
@@ -121,12 +123,12 @@ EXPOSE 8083
 You can also change the default slave agent port for jenkins by defining `JENKINS_SLAVE_AGENT_PORT` in a sample Dockerfile.
 
 ```
-FROM jenkins:1.565.3
+FROM jubicoy/jenkins-base-debian
 ENV JENKINS_SLAVE_AGENT_PORT 50001
 ```
 or as a parameter to docker,
 ```
-docker run --name myjenkins -p 8080:8080 -p 50001:50001 --env JENKINS_SLAVE_AGENT_PORT=50001 jenkinsci/jenkins:lts
+docker run --name myjenkins -p 8080:8080 -p 50001:50001 --env JENKINS_SLAVE_AGENT_PORT=50001 jubicoy/jenkins-base-debian
 ```
 
 # Installing more tools
@@ -134,7 +136,7 @@ docker run --name myjenkins -p 8080:8080 -p 50001:50001 --env JENKINS_SLAVE_AGEN
 You can run your container as root - and install via apt-get, install as part of build steps via jenkins tool installers, or you can create your own Dockerfile to customise, for example:
 
 ```
-FROM jenkins
+FROM jubicoy/jenkins-base-debian
 # if we want to install via apt
 USER root
 RUN apt-get update && apt-get install -y ruby make more-thing-here
@@ -147,7 +149,7 @@ For this purpose, use `/usr/share/jenkins/ref` as a place to define the default 
 wish the target installation to look like :
 
 ```
-FROM jenkins
+FROM jubicoy/jenkins-base-debian
 COPY custom.groovy /usr/share/jenkins/ref/init.groovy.d/custom.groovy
 ```
 

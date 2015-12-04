@@ -1,0 +1,5 @@
+deb     http://http.us.debian.org/debian    unstable main non-free contrib
+deb-src http://http.us.debian.org/debian    unstable main non-free contrib
+
+deb     http://ftp.us.debian.org/debian/    unstable main contrib non-free
+deb-src http://ftp.us.debian.org/debian/    unstable main contrib non-free
