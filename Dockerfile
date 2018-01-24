@@ -9,6 +9,7 @@ ADD ./apt/unstable.list /etc/apt/sources.list.d/unstanble.list
 
 RUN apt-get update \
   && apt-get install -y \
+    gnupg \
     git \
     curl \
     zip \
