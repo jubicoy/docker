@@ -1,9 +1,17 @@
 SHELL := /bin/bash
 
-all: container
+all: image
 
-container:
-	docker build --no-cache -t jubicoy/jenkins-base-debian .
+NOCACHE ?= no
+
+ifeq ($(NOCACHE),no)
+	OPTS :=
+else
+	OPTS := --no-cache
+endif
+
+image:
+	docker build $(OPTS) -t jubicoy/jenkins-base-debian .
 
 push:
 	docker push jubicoy/jenkins-base-debian
