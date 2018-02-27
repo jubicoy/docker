@@ -30,7 +30,7 @@ RUN mkdir -p "${JENKINS_HOME}" \
   && rm /usr/libexec/fix-permissions
 VOLUME /var/jenkins_home
 
-COPY --from=parent /bin/tini /bin/tini
+COPY --from=parent /sbin/tini /sbin/tini
 COPY --from=parent /usr/share/jenkins/ref/init.groovy.d/tcp-slave-agent-port.groovy /usr/share/jenkins/ref/init.groovy.d/tcp-slave-agent-port.groovy
 COPY --from=parent /usr/share/jenkins/jenkins.war /usr/share/jenkins/jenkins.war
 
@@ -45,7 +45,7 @@ ENV COPY_REFERENCE_FILE_LOG $JENKINS_HOME/copy_reference_file.log
 COPY --from=parent /usr/local/bin/jenkins-support /usr/local/bin/jenkins-support
 ADD passwd.template /opt/jenkins/passwd.template
 COPY jenkins.sh /usr/local/bin/jenkins.sh
-ENTRYPOINT ["/bin/tini", "--", "/usr/local/bin/jenkins.sh"]
+ENTRYPOINT ["/sbin/tini", "--", "/usr/local/bin/jenkins.sh"]
 
 # from a derived Dockerfile, can use `RUN plugins.sh active.txt` to setup /usr/share/jenkins/ref/plugins from a support bundle
 COPY --from=parent /usr/local/bin/plugins.sh /usr/local/bin/plugins.sh
